@@ -97,7 +97,8 @@ class AudioRecorder {
       case AudioOutputFormat.WAV:
         return ".wav";
       case AudioOutputFormat.AAC:
-        return ".m4a";
+//        return ".m4a";
+        return ".aac";
       default:
         return ".m4a";
     }
