@@ -144,8 +144,9 @@ public class AudioRecorderPlugin implements MethodCallHandler {
 
   private int getOutputFormatFromString(String outputFormat) {
     switch (outputFormat) {
-      case ".mp4":
       case ".aac":
+        return MediaRecorder.OutputFormat.AAC_ADTS;
+      case ".mp4":
       case ".m4a":
         return MediaRecorder.OutputFormat.MPEG_4;
       default:
