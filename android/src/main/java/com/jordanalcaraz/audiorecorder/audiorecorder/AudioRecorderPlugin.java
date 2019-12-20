@@ -7,6 +7,8 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import com.jordanalcaraz.audiorecorder.audiorecorder.WavRecorder;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
