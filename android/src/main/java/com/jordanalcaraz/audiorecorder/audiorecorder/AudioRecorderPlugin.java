@@ -7,6 +7,8 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import com.jordanalcaraz.audiorecorder.audiorecorder.WavRecorder;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -144,8 +146,9 @@ public class AudioRecorderPlugin implements MethodCallHandler {
 
   private int getOutputFormatFromString(String outputFormat) {
     switch (outputFormat) {
-      case ".mp4":
       case ".aac":
+        return MediaRecorder.OutputFormat.AAC_ADTS;
+      case ".mp4":
       case ".m4a":
         return MediaRecorder.OutputFormat.MPEG_4;
       default:
