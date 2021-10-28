@@ -12,7 +12,8 @@ dependencies:
 
 
 environment:
-  sdk: ">=2.0.0-dev.40.0.flutter-f981f09760 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
+
 
 flutter:
   plugin:

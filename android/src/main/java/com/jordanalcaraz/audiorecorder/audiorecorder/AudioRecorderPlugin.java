@@ -1,11 +1,14 @@
 package com.jordanalcaraz.audiorecorder.audiorecorder;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.jordanalcaraz.audiorecorder.audiorecorder.WavRecorder;
 
@@ -14,6 +17,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
@@ -23,8 +29,10 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * AudioRecorderPlugin
  */
-public class AudioRecorderPlugin implements MethodCallHandler {
-  private final Registrar registrar;
+public class AudioRecorderPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
+  private MethodChannel channel;
+  private FlutterPluginBinding flutterPluginBinding;
+  private Activity activity;
   private boolean isRecording = false;
   private static final String LOG_TAG = "AudioRecorder";
   private MediaRecorder mRecorder = null;
@@ -32,17 +40,7 @@ public class AudioRecorderPlugin implements MethodCallHandler {
   private Date startTime = null;
   private String mExtension = "";
   private WavRecorder wavRecorder;
-  /**
-   * Plugin registration.
-   */
-  public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "audio_recorder");
-    channel.setMethodCallHandler(new AudioRecorderPlugin(registrar));
-  }
 
-  private AudioRecorderPlugin(Registrar registrar){
-    this.registrar = registrar;
-  }
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
@@ -81,10 +79,9 @@ public class AudioRecorderPlugin implements MethodCallHandler {
         break;
       case "hasPermissions":
         Log.d(LOG_TAG, "Get hasPermissions");
-        Context context = registrar.context();
-        PackageManager pm = context.getPackageManager();
-        int hasStoragePerm = pm.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, context.getPackageName());
-        int hasRecordPerm = pm.checkPermission(Manifest.permission.RECORD_AUDIO, context.getPackageName());
+        PackageManager pm = activity.getPackageManager();
+        int hasStoragePerm = pm.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, activity.getPackageName());
+        int hasRecordPerm = pm.checkPermission(Manifest.permission.RECORD_AUDIO, activity.getPackageName());
         boolean hasPermissions = hasStoragePerm == PackageManager.PERMISSION_GRANTED && hasRecordPerm == PackageManager.PERMISSION_GRANTED;
         result.success(hasPermissions);
         break;
@@ -119,7 +116,7 @@ public class AudioRecorderPlugin implements MethodCallHandler {
   }
 
   private void startWavRecording() {
-    wavRecorder = new WavRecorder(registrar.context(), mFilePath);
+    wavRecorder = new WavRecorder(activity, mFilePath);
     wavRecorder.startRecording();
   }
 
@@ -158,5 +155,37 @@ public class AudioRecorderPlugin implements MethodCallHandler {
 
   private boolean isOutputFormatWav() {
     return mExtension.equals(".wav");
+  }
+
+  @Override
+  public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+    this.flutterPluginBinding = binding;
+  }
+
+  @Override
+  public void onDetachedFromEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
+
+  }
+
+  @Override
+  public void onAttachedToActivity(@NonNull @org.jetbrains.annotations.NotNull ActivityPluginBinding binding) {
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "audio_recorder");
+    channel.setMethodCallHandler(this);
+    activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(@NonNull @org.jetbrains.annotations.NotNull ActivityPluginBinding binding) {
+
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+    channel.setMethodCallHandler(null);
   }
 }
